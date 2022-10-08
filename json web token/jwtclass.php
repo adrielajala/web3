@@ -2,6 +2,7 @@
     class myJWT {
 
         private $senha = "SenhaSecreta";
+        public $time;
 
         public function criaToken($payload) {
 
@@ -12,6 +13,8 @@
             
             $header = json_encode($header);
             $header = base64_encode($header);
+
+            $this -> time = $payload['time'];
             
             $payload = json_encode($payload);
             $payload = base64_encode($payload);
@@ -19,7 +22,7 @@
             $signature = hash_hmac('sha256', "$header.$payload", $this->senha, true);
             $signature = base64_encode($signature);
             
-            echo "<br> <br> $header.$payload.$signature";
+            return "$header.$payload.$signature";
 
         }
 
@@ -39,6 +42,22 @@
             }
             
             return $retorno;
+
+        }
+
+        public function refreshToken($jwt) {
+
+            $tempo = $this -> time;
+
+            while (time() < $tempo + 2) {}
+
+            echo '<br> refresh';
+            $this -> criaToken($jwt);
+
+            header('url="receive_form.php"; refresh=0');
+
+            //echo $tempo;
+
 
         }
 

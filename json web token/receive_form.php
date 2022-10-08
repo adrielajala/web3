@@ -6,7 +6,7 @@
             $user = "root";
             $pass = "";
             $db = "progweb3";
-            $server = "127.0.0.1";
+            $server = "localhost";
             $conn = mysqli_connect($server, $user, $pass, $db);
 
             if($conn->connect_errno)
@@ -16,28 +16,15 @@
                 echo("Conexão ok");
             }
 
-            require_once('jwtclass.php');
-
-            #$jwt = new myJWT();
-
-            #$jwt -> criaToken();
-
-            # vvvvvvv código do professor vvvvvvv
+            require('jwtclass.php');
 
             $myjwt = new myJWT();
-            $user = "adminprogweb";
-            $pass = "ProgWeb3";
-            $db = "progweb3";
-            $conn = mysqli_connect("127.0.0.1", $user, $pass, $db);
-            if ($conn->connect_errno){
-                die("Erro de conexão" . $conn->connect_error);
-            } 
             
             $idUsuario = $_POST["usuario"];
             $senhaUsuario = $_POST["senha"];
             $sql = "select * from usuarios where idusuario = '". $idUsuario ."' and senhausuario = '". $senhaUsuario ."'";
             $resultadoQuery = mysqli_query($conn, $sql);
-            if ($resultadoQuery->num_rows == 0 ){
+            if ($resultadoQuery->num_rows == 0){
                 die("usuário ou senha inválidos");
             }
             $arrayQuery = $resultadoQuery->fetch_assoc();
@@ -50,8 +37,11 @@
             $payload = [
                 'iss' => 'localhost',
                 'nome' => $arrayQuery["nomeusuario"],
-                'email' => $arrayQuery["email"]
+                'email' => $arrayQuery["email"],
+                'time' => time()
             ];
+
+            $time = time();
             
             echo "<BR>";
             echo "<BR>";
@@ -62,9 +52,15 @@
             echo "<BR>";
             echo "Token validado com sucesso?<br>";
             if ($myjwt->validaToken($token)){
-                echo "sim<Br>";
+                echo "sim";
+
+                while (time() < $time + 2) {}
+
+                $myjwt -> refreshToken($token);
+
+                
             }else{
-                echo "não<br>";
+                echo "não";
             }
             
         ?>
